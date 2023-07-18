@@ -194,12 +194,12 @@ Disk Flags:
   </step>
   </procedure>
   <para>
-    The following procedure describes replacing of the disk.
+    The following procedure describes replacement of the disk.
   </para>
   <procedure>
     <step>
       <para>
-        If the broken disk is still present in the array, mark each partition of the disk as failed:
+        If the broken disk is still present in the array, mark <emphasis role="bold">each</emphasis> partition of the disk as failed:
       </para>
       <screen>&prompt.root;<command>mdadm --manage /dev/md127 --fail /dev/vdd<replaceable>PARTITION_ID</replaceable></command>
 
@@ -217,7 +217,12 @@ Disk Flags:
     </step>
     <step>
       <para>
-        Prepare the new disk. Use a disk of the same size as the broken one or identical to the disk in the array. 
+        The recommended step is to remove the media from the system completely.
+      </para>
+    </step>
+    <step>
+      <para>
+        Prepare the new disk. Use a disk of the same size as the broken one or identical to a disk in the array. 
       </para>
       <para>
         The new disk must be empty. To ensure this, run the following command:
@@ -228,13 +233,52 @@ Disk Flags:
         As the limit has not been specified, the error: <emphasis>dd: error writing '/dev/vdd': No space left on device</emphasis> appears, but can be ignored.
       </para>
     </step>
-    <step>
+    </procedure>
+    <important>
+      <title>Do not reboot your system when performing changes described further</title>
+    <para>
+      The following steps must be performed without rebooting or powering off the system, unless specifically recommended.
+    </para>
+    </important>
+    <para>
+      In the following procedure, the <literal>/dev/vdd</literal> is the removed disk and <literal>/dev/vdc</literal> is the one working flawlessly. 
+    </para>
+    <procedure>
+      <step>
+        <warning>
+      <title>The order of commands arguments matters</title>
       <para>
-        In the following steps, you 
+If you switch the order of arguments of the following command, the partition table of the working disk <literal>/dev/vdc</literal> will be erased.
       </para>
-    </step>
-  </procedure>
-   </sect2>
+    </warning>
+    <para>
+      Copy the partition information: 
+    </para>
+    <screen>&prompt.root;sgdisk -R /dev/vdd /dev/vdc</screen>
+      </step>
+      <step>
+        <para>
+          Check the target:
+        </para>
+        <screen>&prompt.root; parted /dev/vdd print
+Model: Virtio Block Device (virtblk)                                      
+Disk /dev/vdd: 10.7GB
+Sector size (logical/physical): 512B/512B
+Disk Flags: 
+ 
+Number  Start   End    Size   File system  Name  Flags
+ 1      1049kB  158MB  10GB                     raid
+ 2      158MB   240GB  10GB                     raid
+        </screen>
+      </step>
+      <step>
+        <para>
+          Create new UUIDs for <literal>/dev/vdd</literal>:
+        </para>
+        <screen>&prompt.root;sgdisk -G /dev/vdd</screen>
+      </step>
+    </procedure>
+    </sect2>
   
  </sect1>
  
