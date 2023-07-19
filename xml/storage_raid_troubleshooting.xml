@@ -111,6 +111,7 @@
       Before making any changes to the array, perform several checks as described below.
     </para>
     <procedure>
+      <title>Performing checks of the array</title>
       <step>
     <para>
       View the current state of the array by running:
@@ -197,6 +198,7 @@ Disk Flags:
     The following procedure describes replacement of the disk.
   </para>
   <procedure>
+    <title>Removing the failed disk</title>
     <step>
       <para>
         If the broken disk is still present in the array, mark <emphasis role="bold">each</emphasis> partition of the disk as failed:
@@ -244,6 +246,7 @@ Disk Flags:
       In the following procedure, the <literal>/dev/vdd</literal> is the removed disk and <literal>/dev/vdc</literal> is the one working flawlessly. 
     </para>
     <procedure>
+      <title>Preparing the new disk</title>
       <step>
         <warning>
       <title>The order of commands arguments matters</title>
@@ -276,6 +279,43 @@ Number  Start   End    Size   File system  Name  Flags
           Create new UUIDs for <literal>/dev/vdd</literal>:
         </para>
         <screen>&prompt.root;sgdisk -G /dev/vdd</screen>
+      </step>
+    </procedure>
+    <para>
+      Now the array is ready to be recreated as described below:
+    </para>
+    <procedure>
+      <title>Recreating the RAID</title>
+      <step>
+        <para>
+          Check the number of the md devices and disk partiotions included in the md devices:
+        </para>
+        <screen>&prompt.root;cat /proc/mdstat</screen>
+      </step>
+      <step>
+        <para>
+          Add each partition of the new disk to the array according to the output of the previous step. For example, if <literal>md127</literal> is using <literal>/dev/vdc1</literal> include <literal>/dev/vdd1</literal>
+        </para>
+        <screen>&prompt.root;mdadm --manage /dev/md127 --add /dev/vdd1</screen>
+      </step>
+      <step>
+        <para>
+          Check the array again:
+        </para>
+        <screen>&prompt.root;cat /proc/mdstat</screen>
+        <para>
+          You should see the added partition in the command output.
+        </para>
+      </step>
+      <step>
+        <para>
+          Repeat the previous step for each array partitions.
+        </para>
+      </step>
+      <step>
+        <para>
+          Once the recovery is complete, each md device should show <literal>[UU]</literal> in the <command>cat /proc/mdstat</command> output and there smust not be any undescore symbol.
+        </para>
       </step>
     </procedure>
     </sect2>
